@@ -1,0 +1,6 @@
+---
+- hosts: all
+  gather_facts: False
+  sudo: True
+  roles:
+    - role: pypicloud

@@ -1,0 +1,5 @@
+group_vars/local
+group_vars/production
+group_vars/staging
+hosts
+.vagrant
