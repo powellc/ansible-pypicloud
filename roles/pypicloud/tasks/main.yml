@@ -1,33 +1,60 @@
 ---
-  - name: Create user.
+  - name: Ensure we have a user to run pypicloud under
     user: home=/home/{{deployment_name}} name={{deployment_name}} shell=/bin/bash state=present
-    sudo_user: root
+    become_user: root
 
-  - name: Update needed system packages
+  - name: Ensure system packages are up to date
     apt: pkg={{item}} state=installed update-cache=yes
     with_items: 
       - build-essential
       - python-pip
       - python-virtualenv
       - python-dev
-    sudo_user: root
+    become_user: root
 
-  - name: Install pypicloud python package
-    pip: name=pypicloud version={{pypicloud_version}} virtualenv=/home/{{deployment_name}}/venv/
-    sudo_user: "{{deployment_name}}"
+  - name: Ensure python depdendencies are installed
+    pip: name={{item}} virtualenv="{{deployment_name}}/venv" virtualenv_python="python3"
+    with_items: 
+      - paste
+      - deploy
+    become_user: "{{deployment_name}}"
 
-  - name: Install waitress python package
-    pip: name=waitress virtualenv=/home/{{deployment_name}}/venv/
-    sudo_user: "{{deployment_name}}"
+  - name: Ensure the pypicloud packages is installed
+    pip: name=pypicloud
+         version={{pypicloud_version}}
+         virtualenv="{{deployment_name}}/venv"
+    become_user: "{{deployment_name}}"
 
-  - name: Install pypicloud conf file.
+  - name: Ensure uwsgi server is installed
+    pip: name=uwsgi virtualenv=/home/{{deployment_name}}/venv/
+    become_user: "{{deployment_name}}"
+
+  - name: Ensure the pypicloud configuration file is up to date
     template: src=server.ini.j2 dest=/home/{{deployment_name}}/server.ini mode=0600
-    sudo_user: "{{deployment_name}}"
+    become_user: "{{deployment_name}}"
 
-  - name: Install upstart conf file.
-    template: src=pypicloud.conf.j2 dest=/etc/init/pypicloud.conf mode=0600
+  - name: Ensure the nginx configuration file is installed
+    template: src=nginx.conf.j2 dest=/etc/nginx/sites-enabled/pypicloud
+    register: nginx_updated
+    when: use_nginx
+  
+  - name: Restart NGINX
+    service: name=nginx state=restarted
     sudo_user: root
+    when: nginx_updated
 
-  - name: Restart pypicloud
-    service: name=pypicloud state=restarted
-    sudo_user: root
+  # Install application systemd script
+  - name: Ensure systemd script exists for application
+    template: src=systemd.service.j2 dest=/lib/systemd/system/{{deployment_name}}.service mode=0600
+    register: systemd_updated 
+
+  # Reload systemctl
+  - name: Ensure systemd config files are updated
+    shell: systemctl daemon-reload
+    become_user: root
+    when: systemd_updated
+
+  # Start app
+  - name: Ensure pypicloud has been restarted
+    service: name={{deployment_name}} state=restarted
+    become_user: root

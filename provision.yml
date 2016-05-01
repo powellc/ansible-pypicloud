@@ -5,5 +5,5 @@
   sudo: True
   roles:
     - role: common
-    - role: pypicloud
     - role: nginx
+    - role: pypicloud

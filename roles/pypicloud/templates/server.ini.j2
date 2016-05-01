@@ -22,9 +22,9 @@ storage.bucket = {{bucket_name}}
 db.url = sqlite:///%(here)s/db.sqlite
 
 auth.admins =
-  {{default_user}}
+  {{admin_user}}
 
-user.{{default_user}} = {{default_pass}}
+user.{{admin_user}} = {{admin_pass}}
 
 # For beaker
 session.encrypt_key = {{encrypt_key}}
@@ -35,10 +35,17 @@ session.secure = {{secure_session}}
 # wsgi server configuration
 ###
 
-[server:main]
-use = egg:waitress#main
-host = 0.0.0.0
-port = {{port_number}}
+[uwsgi]
+paste = config:%p
+paste-logger = %p
+master = true
+processes = {{ process_number }}
+reload-mercy = 15
+worker-reload-mercy = 15
+max-requests = 1000
+enable-threads = truesocket = 127.0.0.1:{{port_number}}
+virtualenv = /home/{{deployment_name}}/venv
+
 
 ###
 # logging configuration

@@ -5,7 +5,7 @@ upstream {{deployment_name}}_process {
 server {
         listen 80;
 
-        server_name  {{hostname}}.{{domainname}};
+        server_name  {{domainname}};
 
         access_log  /var/log/nginx/{{deployment_name}}.access.log;
         error_log /var/log/nginx/{{deployment_name}}.error.log;
@@ -26,7 +26,7 @@ server {
         }
 }
 
-{% if secure_session %}
+{% if nginx_ssl %}
 server {
         listen  443 ssl;
 
@@ -34,6 +34,7 @@ server {
 
         ssl_certificate  /etc/ssl/certs/{{deployment_name}}.crt;
         ssl_certificate_key /etc/ssl/private/{{deployment_name}}.key;
+
 
         access_log  /var/log/nginx/{{deployment_name}}.access.log;
         error_log /var/log/nginx/{{deployment_name}}.error.log;

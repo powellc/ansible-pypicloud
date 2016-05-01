@@ -16,6 +16,7 @@
 
   - name: Set localtime
     command: /bin/cp /usr/share/zoneinfo/{{timezone}} /etc/localtime
+    ignore_errors: true
 
   - name: Set timezone
     template: src=timezone.conf dest=/etc/timezone
