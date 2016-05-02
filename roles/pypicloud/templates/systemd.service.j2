@@ -4,9 +4,9 @@ After=network.target
 
 [Service]
 Type=idle
-PIDFile=/home/{{deployment_name}}/app.pid
+PIDFile={{deployment_path}}/{{deployment_name}}/app.pid
 User=pypicloud
-ExecStart=/home/{{deployment_name}}/venv/bin/uwsgi --ini-paste-logged /home/{{deployment_name}}/server.ini --http 127.0.0.1:{{port_number}} --pidfile /home/{{deployment_name}}/app.pid
+ExecStart={{deployment_path}}/{{deployment_name}}/venv/bin/uwsgi --ini-paste-logged {{deployment_path}}/{{deployment_name}}/server.ini --http 127.0.0.1:{{port_number}} --pidfile {{deployment_path}}/{{deployment_name}}/app.pid
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
 

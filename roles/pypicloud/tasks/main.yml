@@ -1,6 +1,6 @@
 ---
   - name: Ensure we have a user to run pypicloud under
-    user: home=/home/{{deployment_name}} name={{deployment_name}} shell=/bin/bash state=present
+    user: home={{deployment_path}}/{{deployment_name}} name={{deployment_name}} shell=/bin/bash state=present
     become_user: root
 
   - name: Ensure system packages are up to date
@@ -12,26 +12,22 @@
       - python-dev
     become_user: root
 
-  - name: Ensure python depdendencies are installed
-    pip: name={{item}} virtualenv="{{deployment_name}}/venv" virtualenv_python="python3"
-    with_items: 
-      - paste
-      - deploy
+  - name: Ensure uWSGI and PasteDeploy are installed
+    pip: name={{item}} virtualenv="{{deployment_path}}/{{deployment_name}}/venv"
     become_user: "{{deployment_name}}"
+    with_items:
+      - PasteDeploy
+      - uwsgi
 
   - name: Ensure the pypicloud packages is installed
-    pip: name=pypicloud
-         version={{pypicloud_version}}
-         virtualenv="{{deployment_name}}/venv"
-    become_user: "{{deployment_name}}"
-
-  - name: Ensure uwsgi server is installed
-    pip: name=uwsgi virtualenv=/home/{{deployment_name}}/venv/
+    pip: name=pypicloud version={{pypicloud_version}} virtualenv="{{deployment_path}}/{{deployment_name}}/venv"
     become_user: "{{deployment_name}}"
 
   - name: Ensure the pypicloud configuration file is up to date
-    template: src=server.ini.j2 dest=/home/{{deployment_name}}/server.ini mode=0600
+    template: src=server.ini.j2 dest={{deployment_path}}/{{deployment_name}}/server.ini mode=0600
     become_user: "{{deployment_name}}"
+    tags:
+      - deploy
 
   - name: Ensure the nginx configuration file is installed
     template: src=nginx.conf.j2 dest=/etc/nginx/sites-enabled/pypicloud
@@ -47,14 +43,21 @@
   - name: Ensure systemd script exists for application
     template: src=systemd.service.j2 dest=/lib/systemd/system/{{deployment_name}}.service mode=0600
     register: systemd_updated 
+    tags:
+      - deploy
 
   # Reload systemctl
   - name: Ensure systemd config files are updated
     shell: systemctl daemon-reload
     become_user: root
     when: systemd_updated
+    tags:
+      - deploy
+    ignore_errors: true
 
   # Start app
   - name: Ensure pypicloud has been restarted
     service: name={{deployment_name}} state=restarted
     become_user: root
+    tags:
+      - deploy

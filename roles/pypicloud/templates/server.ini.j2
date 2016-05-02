@@ -13,11 +13,14 @@ pypi.default_write =
     authenticated
 
 pypi.storage = {{storage_type}}
+{% if storage_type == 'file' %}
+storage.dir = {{deployment_path}}/{{deployment_name}}/packages
+{% endif %}
 {% if storage_type == 's3' %}
 storage.access_key = {{access_key}}
 storage.secret_key = {{secret_key}}
-{% endif %}
 storage.bucket = {{bucket_name}}
+{% endif %}
 
 db.url = sqlite:///%(here)s/db.sqlite
 
@@ -44,7 +47,7 @@ reload-mercy = 15
 worker-reload-mercy = 15
 max-requests = 1000
 enable-threads = truesocket = 127.0.0.1:{{port_number}}
-virtualenv = /home/{{deployment_name}}/venv
+virtualenv = {{deployment_path}}/{{deployment_name}}/venv
 
 
 ###

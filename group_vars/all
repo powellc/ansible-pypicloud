@@ -3,8 +3,10 @@ user: root
 hostname: pypi
 pypicloud_version: 0.3.10
 use_nginx: true
+nginx_ssl: false
+use_apache: false
 timezone: America/New_York
 locale: en_US.UTF-8
 deployment_name: pypicloud
+deployment_path: /home
 port_number: 6543
-nginx_ssl: false

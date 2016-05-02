@@ -1,15 +1,18 @@
 ---
-  - name: Install NGINX
+  - name: Ensure that NGINX is installed
     apt: pkg={{item}} state=installed update-cache=no
     with_items: 
       - nginx
     sudo_user: root
 
-  - name: Install NGINX site conf file.
+  - name: Ensure that the default NGINX site is disabled
+    file: path=/etc/nginx/sites-enabled/default state=absent
+
+  - name: Ensure that the NGINX configuration file is up to date
     template: src=nginx.global.conf.j2 dest=/etc/nginx/nginx.conf
     register: nginx_sites
 
-  - name: Restart NGINX
+  - name: Ensure that NGINX has been restarted
     service: name=nginx state=restarted
     sudo_user: root
     when: nginx_sites.changed

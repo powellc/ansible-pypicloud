@@ -1,11 +1,6 @@
 ---
-domainname: example.com
-bucket_name: example-pypicloud
-storage_type: s3
-access_key: AWSACCESSKEY
-secret_key: AWSSECRETKEY
+domainname: pypi-test.onec.me
 admin_user: admin
-admin_pass: <generate using instructions at http://github.com/powellc/pypicloud/>
-encrypt_key: RANDOM_STRING
-validate_key: RANDOM_STRING
-secure_session: True
+admin_pass: $6$rounds=660040$kpd9dQ7qqI3Wovaw$FwD0dRT/9TMcMbBAr0HelBP5k11jXZqRl7xuMnaL3h.s9ppjC.WbCK2VYfFUANCOCKj9SX9WEdFdujgWXT9PP/
+process_number: 8
+secure_session: False
